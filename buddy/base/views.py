@@ -1,13 +1,14 @@
 from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.contrib.auth.models import User
-from .forms import RoomForm
+
 from django.contrib import messages
 from .models import Room,Topic,Message
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.contrib.auth import authenticate,logout,login
 from django.contrib.auth.forms import UserCreationForm
+from .forms import RoomForm
 
 rooms = [
     {'id': 1, 'name': 'Lets learn python!'},
@@ -111,7 +112,7 @@ def createRoom(request):
     return render(request, 'base/room_form.html', context)
 """
 
-
+"""
 @login_required(login_url='login')
 def createRoom(request):
     form = RoomForm()
@@ -126,9 +127,27 @@ def createRoom(request):
 
     context = {'form': form}
     return render(request, 'base/room_form.html', context)
+"""
 
 
+@login_required(login_url='login')
+def createRoom(request):
+    form = RoomForm()
+    topics = Topic.objects.all()
+    if request.method == 'POST':
+        topic_name = request.POST.get('topic')
+        topic, created = Topic.objects.get_or_create(name=topic_name)
 
+        Room.objects.create(
+            host=request.user,
+            topic=topic,
+            name=request.POST.get('name'),
+            description=request.POST.get('description'),
+        )
+        return redirect('home')
+
+    context = {'form': form, 'topics': topics}
+    return render(request, 'base/room_form.html', context)
 
 
 @login_required(login_url='/login')
@@ -266,3 +285,22 @@ def userProfile(request, pk):
     context = {'user': user, 'rooms': rooms, 'room_messages': room_messages,'topics':topics}
 
     return render(request, 'base/profile.html', context)
+
+"""
+@login_required(login_url='login')
+def updateUser(request):
+    user = request.user
+    form = UserForm(instance=user)
+
+    if request.method == 'POST':
+        form = UserForm(request.POST, request.FILES, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect('user-profile', pk=user.id)
+
+    return render(request, 'base/update-user.html', {'form': form})
+"""
+
+@login_required(login_url='login')
+def updateUser(request):
+    return render(request, 'base/update-user.html')

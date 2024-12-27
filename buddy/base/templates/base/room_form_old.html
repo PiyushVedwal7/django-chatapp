@@ -1,0 +1,10 @@
+{% extends 'main.html' %}
+
+{% block content %}
+  <h2>{{ form.instance.id|default:"Create" }} Room</h2>
+  <form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+  </form>
+{% endblock %}
