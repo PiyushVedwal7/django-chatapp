@@ -1,15 +1,14 @@
 from django.shortcuts import render,redirect
 from django.http import HttpResponse
-from django.contrib.auth.models import User
+#from django.contrib.auth.models import User
 
 from django.contrib import messages
-from .models import Room,Topic,Message
+from .models import Room,Topic,Message,User
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.contrib.auth import authenticate,logout,login
 from django.contrib.auth.forms import UserCreationForm
-from .forms import RoomForm
-
+from .forms import RoomForm,UserForm
 rooms = [
     {'id': 1, 'name': 'Lets learn python!'},
      {'id': 2, 'name': 'Design with me'},
@@ -286,7 +285,7 @@ def userProfile(request, pk):
 
     return render(request, 'base/profile.html', context)
 
-"""
+
 @login_required(login_url='login')
 def updateUser(request):
     user = request.user
@@ -297,10 +296,30 @@ def updateUser(request):
         if form.is_valid():
             form.save()
             return redirect('user-profile', pk=user.id)
+            
 
-    return render(request, 'base/update-user.html', {'form': form})
-"""
+    return render(request, 'base/update-user.html')
+
+
 
 @login_required(login_url='login')
 def updateUser(request):
-    return render(request, 'base/update-user.html')
+    user = request.user
+    form = UserForm(instance=user)
+
+    if request.method == 'POST':
+        form = UserForm(request.POST, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect('user-profile', pk=user.id)
+
+    return render(request, 'base/update-user.html', {'form': form})
+
+
+"""
+@login_required(login_url='login')
+def updateUser(request):
+    user = request.user
+    form = UserForm(instance=user)
+    return render(request, 'base/update-user.html', {'form': form})
+  """  
